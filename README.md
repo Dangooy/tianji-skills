@@ -6,9 +6,14 @@
 
 ## Skill 目录
 
+从找客户到出货核单，外贸全流程逐段搬上 AI。
+
 | Skill | 一句话定位 | 状态 |
 |-------|-----------|------|
 | 🎯 [market-intel（寻客）](./market-intel/) | 外贸客户开发流水线：免费公开数据 → 可触达的分级客户线索 Excel | ✅ 可用 |
+| 🈺 [rfq-to-quotation（译盘）](./rfq-to-quotation/) | 英文/俄文询盘一键转中文报价表，动态识别列+补全标准尺寸 | ✅ 可用 |
+| 🔗 [trade-pipeline（联单）](https://github.com/Dangooy/trade-pipeline-skill) | 一份订单档案自动出报价单/PI/CI/装箱单，改一处四单联动 | ↗ 独立仓库 |
+| 🔎 [verify-docs（核单）](./verify-docs/) | 对比CI和PL贸易文件，逐项核验数量/金额/重量，输出差异报告 | ✅ 可用 |
 
 （持续更新中）
 

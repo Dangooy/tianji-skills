@@ -1,6 +1,9 @@
 # 运行产物
 output/
 *.xlsx
+# demo 示例文件例外（随仓库分发，供 skill 直接跑通）
+!verify-docs/examples/*.xlsx
+!rfq-to-quotation/examples/*.xlsx
 
 # firecrawl 本地缓存
 .firecrawl/
