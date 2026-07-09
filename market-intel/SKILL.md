@@ -16,6 +16,7 @@ allowed-tools:
   - Write
   - TaskCreate
   - TaskUpdate
+  - SendMessage
 ---
 
 # Market Intel — 外贸客户开发系统
@@ -45,7 +46,17 @@ allowed-tools:
 
 每次运行开始时读取此文件。
 
+## 运行前自检（S0）
+
+进入 S1 之前先过三项检查，**任一失败立即停止并告诉用户缺什么**——不要跑到 S2 中途才因缺依赖报错：
+
+1. `firecrawl --status` 能执行且有余额（确认 CLI 已装、API key 已配）
+2. `python3 -c "import openpyxl"` 通过（S5 报告依赖）
+3. `config/company-profile.md` 已存在且已填写（缺则提示用户从 template 复制并填写）
+
 ## 五阶段流水线
+
+S0 自检通过后进入流水线：
 
 ```
 S1 发现 ──▶ S2 提取 ──▶ S3 背调验证 ──▶ S4 评分 ──▶ S5 输出

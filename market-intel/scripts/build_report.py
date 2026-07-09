@@ -63,6 +63,20 @@ def _dm_summary(dms):
     return "\n".join(parts)
 
 
+def _check_lead(obj):
+    """校验单条线索的最小结构；返回问题描述，None 表示通过"""
+    if not isinstance(obj, dict):
+        return "不是 JSON 对象"
+    if "company" not in obj:
+        return "缺 company 字段"
+    cr = obj.get("credibility")
+    if not isinstance(cr, dict) or cr.get("tier") not in ("A", "B", "C"):
+        return "credibility.tier 缺失或不是 A/B/C"
+    if not isinstance(cr.get("score"), (int, float)):
+        return "credibility.score 缺失或非数值"
+    return None
+
+
 def build(leads, meta, output):
     wb = Workbook()
 
@@ -155,6 +169,8 @@ def build(leads, meta, output):
         ["", ""],
         ["免责声明", DISCLAIMER],
     ]
+    if meta.get("skipped_lines"):
+        rows.insert(-2, ["跳过的坏行", meta["skipped_lines"]])
     for r, (k, v) in enumerate(rows, 1):
         kc = ws5.cell(r, 1, k); kc.font = Font(bold=True); kc.alignment = WRAP
         vc = ws5.cell(r, 2, v); vc.alignment = WRAP
@@ -207,11 +223,40 @@ def main():
     ap.add_argument("--output", required=True)
     args = ap.parse_args()
 
+    skipped = 0
     if args.leads:
+        leads = []
         with open(args.leads, encoding="utf-8") as f:
-            leads = [json.loads(line) for line in f if line.strip()]
+            for i, line in enumerate(f, 1):
+                if not line.strip():
+                    continue
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError as e:
+                    print(f"WARN: 第{i}行 JSON 解析失败，已跳过: {e}", file=sys.stderr)
+                    skipped += 1
+                    continue
+                problem = _check_lead(obj)
+                if problem:
+                    print(f"WARN: 第{i}行{problem}，已跳过", file=sys.stderr)
+                    skipped += 1
+                    continue
+                leads.append(obj)
     elif args.data:
-        leads = json.loads(args.data)
+        try:
+            parsed = json.loads(args.data)
+        except json.JSONDecodeError as e:
+            print(f"VERIFY_FAIL: --data 不是合法 JSON: {e}", file=sys.stderr); sys.exit(1)
+        if not isinstance(parsed, list):
+            print("VERIFY_FAIL: --data 必须是 JSON 数组", file=sys.stderr); sys.exit(1)
+        leads = []
+        for i, obj in enumerate(parsed, 1):
+            problem = _check_lead(obj)
+            if problem:
+                print(f"WARN: 第{i}条{problem}，已跳过", file=sys.stderr)
+                skipped += 1
+                continue
+            leads.append(obj)
     else:
         print("VERIFY_FAIL: 需 --leads 或 --data", file=sys.stderr); sys.exit(1)
 
@@ -225,7 +270,10 @@ def main():
     meta.setdefault("generated_at", datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M"))
 
     if not leads:
-        print("VERIFY_FAIL: 线索为空", file=sys.stderr); sys.exit(1)
+        msg = f"leads 无有效数据（共跳过 {skipped} 行）" if skipped else "线索为空"
+        print(f"VERIFY_FAIL: {msg}", file=sys.stderr); sys.exit(1)
+    if skipped:
+        meta["skipped_lines"] = skipped
 
     expect = build(leads, meta, args.output)
     problems = verify(args.output, expect)
@@ -234,6 +282,8 @@ def main():
     print(f"SUCCESS: {args.output}")
     print(f"  线索 {expect['total']} 条 | A {expect['tiers']['A']} / "
           f"B {expect['tiers']['B']} / C {expect['tiers']['C']}")
+    if skipped:
+        print(f"  跳过坏行 {skipped} 条（详见 stderr WARN，已记入报告元数据）")
 
 
 if __name__ == "__main__":
