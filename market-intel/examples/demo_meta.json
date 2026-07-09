@@ -1,0 +1,8 @@
+{
+  "keywords": ["washer", "fastener", "шайба", "крепёж", "DIN 125", "DIN 933"],
+  "hs_codes": ["7318.21", "7318.22", "7318.15"],
+  "markets": ["澳大利亚", "俄罗斯", "新西兰", "英国"],
+  "funnel": {"discovered": 8, "extracted": 5, "verified": 4},
+  "cost": {"firecrawl_credits": 9},
+  "sources_used": ["WebSearch", "Europages", "Pulscen.ru", "Yellow Pages AU", "firecrawl scrape"]
+}

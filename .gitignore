@@ -1,0 +1,16 @@
+# 运行产物
+output/
+*.xlsx
+
+# firecrawl 本地缓存
+.firecrawl/
+
+# Python
+__pycache__/
+*.pyc
+
+# 用户私有配置（模板保留，实配不入库）
+market-intel/config/company-profile.md
+
+# macOS
+.DS_Store
