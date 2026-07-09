@@ -1,4 +1,4 @@
-# 🈺 rfq-to-quotation（译盘）— 询盘转中文报价表
+# rfq-to-quotation（译盘）— 询盘转中文报价表
 
 一个 Claude Code skill：把客户发来的英文/俄文询盘 Excel，转换成供内部报价员填写单价的**中文报价表**。
 
