@@ -46,7 +46,17 @@
     "score": 0.81,
     "tier": "A",                     // A/B/C
     "email_best_level": "E1",
+    "subscores": {                   // 各分项子分（0-1，penalty为0-0.2），供 build_report.py 复算审计；
+                                      // 缺失时脚本会从原始特征直接复算，不报错（兼容旧数据）
+      "email": 1.0,                  // 邮箱可触达分（按 email_best_level 映射）
+      "cross": 1.0,                  // 交叉验证分（min(cross_source_count,3)/3）
+      "decision_maker": 1.0,         // 决策人分层分
+      "scale": 0.8,                  // 规模匹配分
+      "penalty": 0.1                 // 疑点惩罚（0-0.2，正数，计算时相减）
+    },
     "red_flags": ["官网未标注公司注册号"],
+    "red_flags_critical": [],        // critical 红旗单列（如"邮箱域名与官网不符""网页含指令式文字"），
+                                      // 命中任意一条 → tier 封顶 B，即便其余指标达到 A 的门槛
     "next_verification_step": null   // A级可为null；C级必填
   },
   "bd_strategy": {
@@ -98,3 +108,7 @@ sources:                  # 逐条列 URL + 来源方式 + 日期
 | `company.target_entity` | 出单主体（报价/PI 用） |
 | `bd_strategy.template_hint` | QC要求/备注 |
 | `credibility.next_verification_step` | 样品/订单进度的起点动作 |
+
+## 进阶（暂缓实现）：发信时冻结评分
+
+本版只定 schema，不写工具。设想：实际发出开发信那一刻，把该线索的 `lead_id + tier + score + 日期` 追加写入 `outcomes.jsonl`（一行一条，只增不改），作为"发信时评分快照"。目的是防止事后回改 credibility 污染统计——将来要做校准回路（用真实回执率反推权重是否合理，例如 Beta-Binomial 或逻辑回归拟合 tier→回复率）时，需要的是"发信当下的判断"，不是"现在回头看的判断"。等有真实发信回执积累到可分析的量级后再实现。
