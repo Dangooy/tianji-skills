@@ -35,7 +35,7 @@ python3 examples/generate_demo.py
 
 把 `rfq-to-quotation/` 目录放进 Claude Code skills 目录（如 `~/.claude/skills/rfq-to-quotation/`），或对 Claude 说"帮我安装这个 skill：<仓库URL>"。
 
-依赖：`python3` + `xlrd`（读 .xls）+ `openpyxl`（读写 .xlsx）。
+依赖：`python3` + `xlrd`（读 .xls）+ `openpyxl`（读写 .xlsx）。不依赖 pandas。
 
 ## 适用范围
 
