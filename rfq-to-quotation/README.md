@@ -41,6 +41,8 @@ python3 examples/generate_demo.py
 
 本 skill 输出**中文报价表（内部使用）**，用于报价员填写单价。生成发给客户的英文报价单不在本 skill 范围内。
 
+**数据门禁**：尺寸补全只查 `references/din_dimensions.md`，表里查不到的规格一律留空待人工填写，不会由 AI 编数。换行业沿用本 skill 时，请按 `din_dimensions.md` 开头的数据治理规则重建自己行业的参考表（每个数值都要有可指认来源）。
+
 ## 目录结构
 
 ```
