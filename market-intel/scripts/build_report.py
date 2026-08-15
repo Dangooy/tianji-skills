@@ -78,13 +78,22 @@ def _check_lead(obj):
     """校验单条线索的最小结构；返回问题描述，None 表示通过"""
     if not isinstance(obj, dict):
         return "不是 JSON 对象"
-    if "company" not in obj:
-        return "缺 company 字段"
+    if not isinstance(obj.get("company"), dict):
+        return "company 缺失或不是对象"
     cr = obj.get("credibility")
     if not isinstance(cr, dict) or cr.get("tier") not in ("A", "B", "C"):
         return "credibility.tier 缺失或不是 A/B/C"
     if not isinstance(cr.get("score"), (int, float)):
         return "credibility.score 缺失或非数值"
+    # 嵌套字段类型校验：build()/_recompute_credibility 会对其调 .get()/迭代，
+    # 类型错（如字符串）会 AttributeError 击穿整单运行，违反"一条坏线索不废整份报告"原则
+    dms = obj.get("decision_makers", [])
+    if not isinstance(dms, list) or any(not isinstance(d, dict) for d in dms):
+        return "decision_makers 不是对象数组"
+    for field in ("bd_strategy", "lead_source", "scale_signals"):
+        v = obj.get(field, {})
+        if not isinstance(v, dict):
+            return f"{field} 不是对象"
     return None
 
 
