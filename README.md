@@ -1,8 +1,8 @@
 # 🔭 Tianji Skills
 
-#### 天机，可以泄露 —— 一个把外贸生意跑在 Claude Code 上的工厂主
+#### 天机，可以泄露 —— 从真实制造业外贸中沉淀的、可核验的 AI 工作流
 
-我是杨天机，在一家紧固件工厂用 Claude Code 跑日常外贸业务。这里沉淀的是**在真实生产环境里验证过、脱敏后开源**的 skill。每个 skill 都能直接装进你的 Claude Code 使用，行业示例以紧固件/垫圈为主，方法论适用于任何 B2B 外贸品类。
+我是杨天机（Yang Tian · Ethan Yang）。这里沉淀的是**在真实生产环境里验证过、脱敏后开源**的 AI 工作流组件。Claude Code 是已验证的运行环境之一；行业示例以紧固件/垫圈为主，方法论适用于 B2B 外贸场景。\n\n> 先从旗舰产品 [Trade Pipeline](https://github.com/Dangooy/trade-pipeline-skill) 了解完整的单证工作流；关于公开范围与后续方向，见 [Publication Policy](PUBLICATION_POLICY.md) 和 [Roadmap](ROADMAP.md)。
 
 ## Skill 目录
 
