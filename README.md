@@ -1,5 +1,7 @@
 # 🔭 Tianji Skills
 
+[![CI](https://github.com/Dangooy/tianji-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/Dangooy/tianji-skills/actions/workflows/ci.yml)
+
 #### 天机，可以泄露 —— 从真实制造业外贸中沉淀的、可核验的 AI 工作流
 
 我是杨天机（Yang Tian · Ethan Yang）。这里沉淀的是**在真实生产环境里验证过、脱敏后开源**的 AI 工作流组件。Claude Code 是已验证的运行环境之一；行业示例以紧固件/垫圈为主，方法论适用于 B2B 外贸场景。

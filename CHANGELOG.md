@@ -64,6 +64,8 @@ S3 背调原先写死「用 `TaskCreate` 扇出子 agent」。改为：**子 age
 
 **新增配置**：`pyproject.toml`（pytest 与 ruff 配置；本仓库交付 skill 而非 Python 包，故无 `[project]` 段）、`requirements-dev.txt`（开发/CI 依赖）。
 
+**README 顶部加 CI 状态徽章**，链接到 Actions 运行页。
+
 **顺带修掉的真问题**：
 
 - `market-intel/scripts/build_report.py`：删除未使用的 `re` 导入（死代码）。
