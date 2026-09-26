@@ -244,6 +244,16 @@ def _recompute_credibility(lead, warnings):
         s_scale = _clamp(subscores.get("scale", 0.0))
         s_penalty = _clamp(subscores.get("penalty", penalty_from_features), 0.0, PENALTY_CAP)
 
+        # 决策人子分同样必须复算，不能采信自报值：_decision_maker_component 的
+        # 判据（具名=1.0 / 部门角色=0.6 / 仅 generic=0.3 / 无=0.0）在
+        # scoring-rubric.md 里已是确定性规则，没有理由只做 clamp。
+        # 漏这一步时，"只挂 generic 邮箱却自报决策人 1.0"可虚增 0.14 分。
+        if abs(s_dm - dm_c) > 0.02:
+            warnings.append(
+                f"{lead_id}: subscores.decision_maker={s_dm} 与复算决策人子分 {dm_c:.2f} 不符，以特征为准"
+            )
+            s_dm = dm_c
+
         if abs(s_email - email_c) > 0.02:
             warnings.append(
                 f"{lead_id}: subscores.email={s_email} 与复算邮箱子分 {email_c:.2f}（基于 {best_level}）不符，以特征为准"
@@ -283,7 +293,16 @@ def _recompute_credibility(lead, warnings):
     has_critical = len(critical_flags) > 0
     is_c = (score < B_SCORE_MIN) or (cross_count <= 1) or (best_level == "E4")
 
-    if (score >= A_SCORE_MIN and best_level in ("E1", "E2")
+    # A 级还要求"可复算子集"单独达标。动机：`scale` 分量没有独立可复算的特征
+    # （rubric 对它是定性描述），只能采信自报值。若不设这道闸，仅靠虚报 scale
+    # 就能把"只有 generic 邮箱 + 3 个源"（可复算 0.40+0.25+0.06=0.71）抬到
+    # 0.86 而进入 A 级。加上后，A 级必须由可复算证据支撑：
+    #   0.40·email + 0.25·cross + 0.20·dm − penalty ≥ 0.75
+    # dm 诚实值 0.3 时该式上限为 0.71 < 0.75，故 scale 无法再单独制造 A。
+    verifiable = (W["email"] * email_c + W["cross"] * cross_c
+                  + W["decision_maker"] * dm_c - penalty_from_features)
+    if (score >= A_SCORE_MIN and verifiable >= A_SCORE_MIN
+            and best_level in ("E1", "E2")
             and cross_count >= 2 and not has_critical):
         tier = "A"
     elif is_c:

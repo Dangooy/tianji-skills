@@ -4,6 +4,8 @@
 
 我是杨天机（Yang Tian · Ethan Yang）。这里沉淀的是**在真实生产环境里验证过、脱敏后开源**的 AI 工作流组件。Claude Code 是已验证的运行环境之一；行业示例以紧固件/垫圈为主，方法论适用于 B2B 外贸场景。\n\n> 先从旗舰产品 [Trade Pipeline](https://github.com/Dangooy/trade-pipeline-skill) 了解完整的单证工作流；关于公开范围与后续方向，见 [Publication Policy](PUBLICATION_POLICY.md) 和 [Roadmap](ROADMAP.md)。
 
+变更记录见 [Changelog](CHANGELOG.md)。
+
 ## Skill 目录
 
 从找客户到出货核单，外贸全流程逐段搬上 AI。

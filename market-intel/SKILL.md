@@ -93,10 +93,18 @@ firecrawl scrape "https://<公司>/contact-us" --format markdown -o /tmp/mi_<slu
 
 ### S3 — 背调验证（Verify）
 
-对每个 S2 存活候选，用 `TaskCreate` **扇出背调子 agent**（每公司一个，隔离上下文，**并发上限 ≤5 个子 agent**）。子 agent 按 `references/verification-playbook.md`：母语媒体交叉、邮箱 E1-E4 分级、规模信号、决策人分层、疑点标注（含 critical/minor 分档）。
+对每个 S2 存活候选，按 `references/verification-playbook.md` 做**逐公司独立背调**：母语媒体交叉、邮箱 E1-E4 分级、规模信号、决策人分层、疑点标注（含 critical/minor 分档）。
 
-- 子 agent **默认只用免费 WebSearch/WebFetch，不新增 firecrawl 外呼**。确需深抓则 SendMessage 向主 agent 申请配额（保证并发不被击穿）。
-- 子 agent 回传结构化 JSON（cross_source_count/email_verification/scale_signals/decision_makers/red_flags/red_flags_critical/native_channel_intel）。
+**执行方式按环境能力选，不影响验证内容：**
+
+- 若本 harness 的**子 agent 机制可用**，且**成本与并发范围合适**，可扇出并行——每公司一个子 agent、隔离上下文、**并发上限 ≤5**。
+- 否则由主 agent **串行**完成**同一份**验证清单。串行不减少检查项，只是耗时更长。
+- 两种方式必须产出**完全相同的输出字段**（见下）；S4/S5 不区分执行方式。
+
+> 不要因为"CLI 支持多 agent"就认定必须并行，也不要因为某环境默认关着就跳过检查——**决定的是速度，不是覆盖率**。
+
+- **默认只用免费 WebSearch/WebFetch，不新增 firecrawl 外呼**。扇出时确需深抓，先向主 agent 申请配额（保证并发不被击穿）；串行时直接回到 S2 的 firecrawl 节奏与 credits 护栏，记录原因、URL、时间戳与消耗。
+- 回传结构化 JSON（cross_source_count/email_verification/scale_signals/decision_makers/red_flags/red_flags_critical/native_channel_intel）。
 
 ### S4 — 评分（Score）
 
@@ -113,7 +121,10 @@ firecrawl scrape "https://<公司>/contact-us" --format markdown -o /tmp/mi_<slu
    ```
    （路径以 skill 目录为基准；按 Agent Skills 标准安装后即 `<skill目录>/scripts/build_report.py`。）
    脚本打印 `VERIFY_FAIL:` 则按提示修数据重跑，不要无视。
-3. **沉淀（可选）**：如果你维护本地 CRM/知识库，可按 `references/lead-schema.md` 的 Markdown 形态把 A/B 级线索各写一个 `prospect-<slug>.md` 档案，C 级汇总成一个市场清单文件，避免档案目录膨胀。
+3. **沉淀（可选，由私有配置决定）**：读 `config/company-profile.md` 的「知识库回写」段：
+   - **未配置或开关关闭** → 跳过本步，不臆造路径。
+   - **已开启** → 按该段给出的根目录 / 客户档案目录 / 市场清单目录 / 索引文件回写：A/B 级各写一个 `prospect-<slug>.md`，C 级汇总进市场清单文件（避免档案目录膨胀），并在索引文件的客户段追加条目。若配置了「沉淀流程文档」路径，先读它并遵循其约定。
+   > 具体路径与企业信息一律来自 `config/company-profile.md`（该文件不进仓库），**不写死在本 SKILL.md 里**——换知识库、换公司只需改配置。
 4. 向用户汇报：Excel 路径、漏斗（发现N→存活N→A/B/C分布）、Top A 级线索、firecrawl credits 消耗、下一步建议。
 
 ## 成本与合规护栏
@@ -122,6 +133,7 @@ firecrawl scrape "https://<公司>/contact-us" --format markdown -o /tmp/mi_<slu
 |------|------|------|
 | S1 免费搜索 | 0 | 只读，直接执行 |
 | S2 firecrawl 批量 | **1** | 开跑前 `firecrawl --status` 读余额，估 `候选数 × 单次成本`，超 `MAX_FIRECRAWL_CREDITS`（config 中配置，默认 150）则展示计划待用户确认 |
+| 付费工具（config 中配置） | **1** | 若 `config/company-profile.md` 的「付费工具门禁」段列了付费数据源/工具，按其规则执行（未配置就不调用）；默认规则：先探明单次成本 → 达阈值前先查余额并展示计划待用户确认，其结果仍视为待核实数据 |
 | S5 生成报告 | 0 | 本地文件，round-trip 自验后报告 |
 
 **工具成本阶梯（能免费绝不付费）**：WebSearch/WebFetch(免费) → firecrawl search(仅URL) → firecrawl scrape(约1 credit/页) → firecrawl agent(最贵，仅复杂站、探针后放量)。
