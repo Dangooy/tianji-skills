@@ -8,7 +8,7 @@
 """
 import os
 from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment
+from openpyxl.styles import Font
 
 OUT_DIR = os.path.dirname(os.path.abspath(__file__))
 

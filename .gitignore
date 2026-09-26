@@ -12,6 +12,10 @@ output/
 __pycache__/
 *.pyc
 
+# 测试与静态检查缓存（pytest / ruff）
+.pytest_cache/
+.ruff_cache/
+
 # 用户私有配置（模板保留，实配不入库）
 market-intel/config/company-profile.md
 

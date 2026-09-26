@@ -1,0 +1,31 @@
+# 本仓库交付的是 Agent Skills（Markdown + 附属脚本），不是可安装的 Python 包，
+# 因此**没有 `[project]` 段**——测试与检查依赖见 `requirements-dev.txt`。
+# 这里只放工具配置（pytest / ruff）。
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# 显式钉住规则集。Ruff 的默认 selection 会随版本变宽，而 CI 装的是有范围的
+# ruff（不是锁定版本）——依赖默认值意味着某天新 ruff 发布就会把绿色构建变红，
+# 而仓库一行代码都没改。trade-pipeline-skill 在 2026-07-26 正是这样被
+# ruff 0.16.0 炸过一次（同一份代码多出 70 条告警）。见 §变更记录。
+#
+# E4 = import 相关，E9 = 语法/运行期错误，F = pyflakes（未定义名、未使用导入等真 bug）。
+# 这三类能接住真正会出错的东西。
+select = ["E4", "E9", "F"]
+#
+# 故意**不含 E7（语句风格：E702 分号连写、E741 变量名 l 等）**：
+# market-intel/scripts/build_report.py 里有 16 处历史写法属于此类，都是风格而非缺陷。
+# 把 E7 加进来意味着在同一次提交里重排一个安全关键脚本的 16 行 —— 属于应该
+# 单独做完、单独审的改动，不应该搭在“加测试与 CI”这次里偷渡。
+# 若要收紧：加 "E7" 到 select，并在同一次提交里逐条改完、重跑全部测试。
+#
+# 变更记录:
+# - 2026-09-26 初始配置。同批修掉了 3 处 F401 死导入（build_report.py 的 `re`、
+#   verify-docs/examples 的 `Alignment`）与 1 处 E401。

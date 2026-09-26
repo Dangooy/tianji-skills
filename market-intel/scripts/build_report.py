@@ -14,7 +14,9 @@ Market Intel 报告生成器 — 从线索 JSON 生成多 Sheet Excel。
 leads 结构见 references/lead-schema.md。meta 结构见 assets/report_template_notes.md。
 成功打印 "SUCCESS: <路径>"，自验失败打印 "VERIFY_FAIL: <原因>" 并退出码 1。
 """
-import argparse, json, re, sys
+import argparse
+import json
+import sys
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 from openpyxl import Workbook, load_workbook

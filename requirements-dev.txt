@@ -1,0 +1,11 @@
+# 开发与 CI 依赖（跑测试 / 静态检查用）。
+#
+# 注意：这些**不是**使用 skill 的依赖。
+# 运行 market-intel 需要的是 python3 + openpyxl + firecrawl CLI，
+# 见 market-intel/README.md「安装与依赖」。
+
+pytest>=7.0,<10
+openpyxl>=3.1.0,<4
+ruff>=0.4.0,<1
+# 用于校验 SKILL.md frontmatter 是否合规（名称/描述长度）
+pyyaml>=6.0,<7

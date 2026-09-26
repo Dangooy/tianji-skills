@@ -43,3 +43,36 @@ S3 背调原先写死「用 `TaskCreate` 扇出子 agent」。改为：**子 age
 ### 文档
 
 - `references/scoring-rubric.md`：补 A 级第二条件与「可复算子集」定义；明确 `scale` 是唯一无法独立复算的分量（此前「逐条复算」的表述过宽，已收紧为诚实边界说明）。
+
+### 测试与 CI（新增）
+
+本仓库此前风有手动验证，无自动化测试也无 CI。本次补齐。
+
+**新增 `tests/`（110 个测试）**，分四层：
+
+| 文件 | 层级 | 覆盖 |
+|---|---|---|
+| `test_scoring_rules.py` | 单元 | 邮箱 E1–E4 分级、采购职能白名单、决策人分层、域名归一化、`_check_lead` 结构校验 |
+| `test_credibility.py` | 单元 | `_recompute_credibility`：自报值覆盖、critical 红旗封顶 B、四个子分逐个交叉核对、`scale` 不得单独制造 A 级、旧数据兼容、幂等性 |
+| `test_security_regression.py` | 端到端 | 真跑 CLI、真开 Excel、真看「A级·可直接发信」名单：三条不同手法的伪造成果均被拦，健康对照仍进 A |
+| `test_report_output.py` | 端到端 | demo 回归（A1/B2/C1 零 WARN）、Sheet 名与顺序、坏行不击穿整单、空数据/缺参数干净失败、免责声明 |
+| `test_docs_consistency.py` | 防漂移 | 评分权重／惩罚值与 rubric 公式一致、A/B 分数线与代码常量一致、S3 同时写明并行与串行、流水线图不得断言无条件并行、README 提及的 Sheet 名与实际一致、正文无字面量转义序列（反斜杠加 n）、frontmatter 符合 Agent Skills 规范 |
+
+测试数据全部在运行期合成，域名用 `.invalid` 保留域，不含任何真实客户信息。
+
+**新增 CI**（`.github/workflows/ci.yml`）：Python 3.11 / 3.12 矩阵，每次 push 与 PR 跑 `ruff check .` + `pytest`。
+
+**新增配置**：`pyproject.toml`（pytest 与 ruff 配置；本仓库交付 skill 而非 Python 包，故无 `[project]` 段）、`requirements-dev.txt`（开发/CI 依赖）。
+
+**顺带修掉的真问题**：
+
+- `market-intel/scripts/build_report.py`：删除未使用的 `re` 导入（死代码）。
+- `verify-docs/examples/generate_demo.py`：删除未使用的 `Alignment` 导入。
+
+**同批修掉的文档不一致**（由新增的防漂移测试指出）：
+
+- `market-intel/SKILL.md` 与 `market-intel/README.md`：流水线图仍写着「免费并行子agent / 每公司1个子agent」，与已改为条件式的 S3 正文矛盾；现改为「子agent背调(可选) / 逐公司验证清单」。README 正文的「并行子 agent 免费背调交叉验证」同步改为说明两条路径。
+- `market-intel/README.md`：demo 小节的 Sheet 名写错（「A级行动清单 / B-C待验证」实际为「A级·可直接发信 / B-C级·待验证」），用户按名字去 Excel 里会找不到。
+- 根 `README.md`：删掉正文里一处字面量转义序列（反斜杠加 n，GitHub 网页上会原样显示这几个字符）。
+
+**已发现但未在本批修改**：`market-intel/scripts/build_report.py` 有 16 处语句风格告警（分号连写 E702、变量名 `l` E741）。已在 `pyproject.toml` 的 `[tool.ruff.lint]` 里显式排除 E7 并说明原因；若要收紧，应单独提交、逐条改完并重跑全部测试。

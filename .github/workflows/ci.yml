@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      # 一个 Python 版本失败不影响其他版本继续跑完 —— 一次就能看清影响范围
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      # 规则集在 pyproject.toml 的 [tool.ruff.lint] 里显式钉住，
+      # 避免新 ruff 版本扩大默认规则集导致构建无故变红。
+      - name: Lint with ruff
+        run: ruff check .
+
+      # 测试用 sys.executable 调起脚本子进程，因此跑的就是这里装好依赖的解释器。
+      - name: Run tests
+        run: pytest
